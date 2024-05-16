@@ -207,31 +207,69 @@ NATURAL INNER JOIN(SELECT país_aluno, estado_aluno, cidade_aluno, rua_aluno, nu
 WHERE id_aluno = (SELECT id_aluno FROM aluno WHERE nome_aluno = 'João Silva'))
 NATURAL INNER JOIN matriculas WHERE ra = 'RA001'
 
+-- Correção
+SELECT * FROM ((matriculas INNER JOIN aluno USING (id_aluno))
+			   INNER JOIN contato USING (id_aluno))
+			   INNER JOIN endereco USING (id_aluno)
+WHERE ra = 'RA001' OR nome_aluno = 'João Silva'
+
 -- Dado o nome de um departamento, exibir o nome de todos os cursos associados a ele.
 SELECT nome_curso FROM curso WHERE id_dep = (SELECT id_dep FROM departamento WHERE nome_dep = 'Engenharia')
+
+-- Correção
+SELECT nome_dep,nome_curso FROM departamento NATURAL INNER JOIN curso
+WHERE nome_dep = 'Engenharia'
 
 -- Dado o nome de uma disciplina, exibir a qual ou quais cursos ela pertence.
 SELECT nome_curso FROM curso NATURAL INNER JOIN curso_disciplina WHERE id_disci = (SELECT id_disci FROM disciplina 
 WHERE nome_disci = 'Introdução à Programação')
 
+-- Correção
+SELECT nome_disci,nome_curso FROM (disciplina NATURAL INNER JOIN curso_disciplina)
+			   NATURAL INNER JOIN curso
+			   WHERE nome_disci = 'Introdução à Programação'
+
 -- Dado o CPF de um aluno, exibir quais disciplinas ele está cursando.
 SELECT nome_disci FROM disciplina NATURAL INNER JOIN matricula_disciplina WHERE ra = (SELECT ra FROM matriculas
 WHERE id_aluno = (SELECT id_aluno FROM aluno WHERE cpf_aluno = '98765432109'))
 
+-- Correção
+SELECT nome_aluno,nome_disci FROM ((aluno NATURAL INNER JOIN matriculas)
+				NATURAL INNER JOIN matricula_disciplina)
+				NATURAL INNER JOIN disciplina
+WHERE cpf_aluno = '98765432109'
+
 -- Filtrar todos os alunos matriculados em um determinado curso.
 SELECT nome_aluno FROM aluno NATURAL INNER JOIN matriculas WHERE id_curso = (SELECT id_curso FROM curso WHERE
 nome_curso = 'Direito')
+
+-- Correção
+SELECT nome_curso, nome_aluno FROM (curso NATURAL INNER JOIN matriculas)
+						NATURAL INNER JOIN aluno
+WHERE nome_curso = 'Direito'
 
 -- Filtrar todos os alunos matriculados em determinada disciplina.
 SELECT nome_aluno FROM aluno NATURAL INNER JOIN matriculas
 NATURAL INNER JOIN matricula_disciplina WHERE id_disci = (SELECT id_disci FROM disciplina WHERE
 nome_disci = 'Análise de Circuitos')
 
+-- Correção
+SELECT nome_disci,nome_aluno FROM ((aluno NATURAL INNER JOIN matriculas)
+				NATURAL INNER JOIN matricula_disciplina)
+				NATURAL INNER JOIN disciplina
+WHERE nome_disci = 'Análise de Circuitos'
+
 -- Filtrar alunos formados.
 SELECT nome_aluno FROM aluno NATURAL INNER JOIN matriculas WHERE status_aluno = 'Formado'
 
+-- Correção
+SELECT nome_aluno, status_aluno FROM aluno NATURAL INNER JOIN matriculas WHERE status_aluno = 'Formado'
+
 -- Filtrar alunos ativos.
 SELECT nome_aluno FROM aluno NATURAL INNER JOIN matriculas WHERE status_aluno = 'Matriculado'
+
+-- Correção
+SELECT nome_aluno, status_aluno FROM aluno NATURAL INNER JOIN matriculas WHERE status_aluno = 'Matriculado'
 
 -- Apresentar a quantidade de alunos ativos por curso.
 SELECT nome_curso, COUNT(nome_aluno)FROM aluno 
